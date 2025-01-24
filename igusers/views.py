@@ -3,11 +3,49 @@ from .forms import LoginForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile, Post, Likes, Comments
+from django.db.models import Count
 # Create your views here.
 
 def home(request):
-    return render(request, "base.html")
+    # all_posts = Post.objects.values(
+    #     "user__username",
+    #     "posts",
+    #     "add_location",
+    #     "uploaded_at"
+    # )
+    
+    all_posts = Post.objects.prefetch_related('likes_set', 'comments_set').annotate(
+        total_likes=Count('likes')  # Count the likes for each post
+    )
+
+    posts_list = list()
+    for post in all_posts:
+        posts_list.append({
+            "user": post.user.username,
+            "post_image": post.posts.url,
+            "uploaded_at": post.uploaded_at,
+            "location": post.add_location or "",
+            "total_likes": post.total_likes,
+            "comments": [
+                {
+                    "user": comment.user.username,
+                    "comment": comment.comment,
+                }
+                for comment in post.comments_set.all().order_by("-id")[:1]
+            ]
+        })
+
+    status_user = UserProfile.objects.all()
+    status_user_list = list()
+    for data in status_user:
+        print(f"==>> data: {data}")
+        status_user_list.append({
+            "username": data.user.username,
+            "profile_photo": data.profile_photo.url
+        })
+
+    return render(request, "base.html", {"posts": posts_list, "status_user": status_user_list})
 
 def signup_view(request):
 
