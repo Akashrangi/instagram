@@ -1,0 +1,5 @@
+<form action="{% url 'import_user' %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="profile" id="profileid">
+    <input type="submit" value="Submit">
+</form>

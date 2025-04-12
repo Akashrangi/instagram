@@ -12,6 +12,16 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.full_name}"
 
+class FollowUnfollow(models.Model):
+    follower = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
+    following = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('follower', 'following')
+
+    def __str__(self):
+        return f"{self.follower}--{self.following}"
+
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     posts = models.ImageField(upload_to="Posts")
@@ -37,3 +47,23 @@ class Comments(models.Model):
 
     def __str__(self):
         return f"{self.user}"
+
+
+# Practice models ---------------------
+class Employee(models.Model):
+    user = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=10)
+    def __str__(self):
+        return f"{self.user}"
+
+class Department(models.Model):
+    department = models.CharField(max_length=100)
+    def __str__(self):
+        return f"{self.department}"
+
+class EmployeeDepartment(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.employee}-{self.department}"
